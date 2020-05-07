@@ -38,6 +38,7 @@ def check_keydown_events(event, ai_settings, screen, ship, bullets):
 def check_play_button(stats, play_button, mouse_x, mouse_y):
     """ 在玩家单击 Play 按钮时开始新游戏 """
     if play_button.rect.collidepoint(mouse_x, mouse_y):
+        stats.reset_stats()
         stats.game_active = True
 
 
@@ -115,7 +116,7 @@ def change_fleet_direction(ai_settings, aliens):
         alien.rect.y += ai_settings.alien_drop_speed
     ai_settings.alien_fleet_direction *= -1
 
-def update_bullets(bullets, aliens):
+def update_bullets(bullets, aliens, stats):
     for bullet in bullets.sprites():
         bullet.update()
         if bullet.rect.bottom <= 0:
@@ -127,6 +128,8 @@ def update_bullets(bullets, aliens):
     collisions = pygame.sprite.groupcollide(bullets, aliens, True, True)
     if collisions:
         print("消灭了 " + str(len(collisions)) + " 个外星人")
+        stats.current_score += 5 * len(collisions)
+        stats.kill_num += len(collisions)
 
 
 def update_ship(ship):
@@ -145,16 +148,19 @@ def update_aliens(ai_settings, stats, screen, ship, aliens, bullets):
     check_aliens_bottom(ai_settings, stats, screen, ship, aliens, bullets)
 
 
-def update_screen(ai_settings, screen, ship, bullets, aliens, stats, play_button):
+def update_screen(ai_settings, screen, ship, bullets, aliens, stats, button_list):
     """更新屏幕上图像，并切换到新的屏幕"""
 
     screen.fill(ai_settings.bg_color)
     if not stats.game_active:
-        play_button.draw()
+        for button in button_list:
+            button.draw()
+        sleep(1)
     else:
-        update_bullets(bullets, aliens)
+        update_bullets(bullets, aliens, stats)
         update_aliens(ai_settings, stats, screen, ship, aliens, bullets) 
-        update_ship(ship) 
+        update_ship(ship)
+        stats.draw() 
    
     pygame.display.flip()
 
