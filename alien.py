@@ -1,4 +1,5 @@
 import pygame
+import os
 from pygame.sprite import Sprite
 
 
@@ -10,7 +11,9 @@ class Alien(Sprite):
         self.ai_settings = ai_settings
 
         # 加载外星人图像，设置属性
-        self.image = pygame.image.load('images/alien.bmp')
+        filename = ai_settings.resource_path(os.path.join("images", "alien.bmp"))
+        # self.image = pygame.image.load('images/alien.bmp')
+        self.image = pygame.image.load(filename)
         self.rect = self.image.get_rect()
 
         self.rect.x = self.rect.width

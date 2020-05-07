@@ -1,5 +1,5 @@
 import pygame
-
+import os
 
 class Ship():
 
@@ -7,7 +7,9 @@ class Ship():
         """初始化飞船并设置其初始位置"""
         self.screen = screen
         # 加载飞船图像并获取其外接矩形
-        self.image = pygame.image.load('images/ship.bmp')
+        filename = ai_settings.resource_path(os.path.join("images", "ship.bmp"))
+        # self.image = pygame.image.load('images/ship.bmp')
+        self.image = pygame.image.load(filename)
         self.rect = self.image.get_rect()
         self.screen_rect = screen.get_rect()
         self.moving_right = False  # True 一直移动

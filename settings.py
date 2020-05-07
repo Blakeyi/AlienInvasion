@@ -1,3 +1,4 @@
+import os, sys
 class Settings():
     '''
     存储游戏设置的类
@@ -21,4 +22,10 @@ class Settings():
         self.alien_step_int = 1  # alien移动步进距离
         self.alien_fleet_direction = 1  #1代表右移，-1代表左移
         self.alien_drop_speed = 50
-
+    
+    def resource_path(self, relative_path):
+        if getattr(sys, 'frozen', False):  # 是否Bundle Resource
+            base_path = sys._MEIPASS
+        else:
+            base_path = os.path.abspath(".")
+        return os.path.join(base_path, relative_path)
