@@ -1,8 +1,11 @@
 import sys, os
 import pygame
+from PyQt5.QtWidgets import QDialog, QApplication
 from bullet import Bullet
 from alien import Alien
 from time import sleep
+import game_setting
+import about
 
 def text_objects(text, font):
     textSurface = font.render(text, True, (255, 255, 255))
@@ -17,7 +20,7 @@ def message_diaplay(srceen, text):
     pygame.display.update()
 
 
-def check_keydown_events(event, ai_settings, screen, ship, bullets):
+def check_keydown_events(event, ai_settings, screen, ship, bullets, game_sounds):
     if event.key == pygame.K_RIGHT:
         ship.moving_right = True
     elif event.key == pygame.K_LEFT:
@@ -31,13 +34,15 @@ def check_keydown_events(event, ai_settings, screen, ship, bullets):
             ship.bullet_num -= 1
             new_bullet = Bullet(ai_settings, screen, ship)
             bullets.add(new_bullet)
+            game_sounds[0].play()
     elif event.key == pygame.K_q:
         sys.exit()
 
 
-def check_play_button(stats, play_button, mouse_x, mouse_y):
+def check_click_button(ai_settings, stats, button_list, mouse_x, mouse_y):
     """ 在玩家单击 Play 按钮时开始新游戏 """
-    if play_button.rect.collidepoint(mouse_x, mouse_y):
+    print(mouse_x, mouse_y)
+    if button_list[2].rect.collidepoint(mouse_x, mouse_y + 20):
         stats.reset_stats()
         stats.game_active = True
 
@@ -50,18 +55,18 @@ def check_keyup_events(event, ship):
         ship.moving_left = False
 
 
-def check_events(ai_settings, screen, ship, bullets, stats, play_button):
+def check_events(ai_settings, screen, ship, bullets, stats, play_button, game_sounds):
     """ 响应按键和鼠标事件 """
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             os._exit(0)
         elif event.type == pygame.KEYDOWN:
-            check_keydown_events(event, ai_settings, screen, ship, bullets)
+            check_keydown_events(event, ai_settings, screen, ship, bullets, game_sounds)
         elif event.type == pygame.KEYUP:
             check_keyup_events(event, ship)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = pygame.mouse.get_pos()
-            check_play_button(stats, play_button, mouse_x, mouse_y)
+            check_click_button(ai_settings, stats, play_button, mouse_x, mouse_y)
 
 
 def get_number_aliens_x(ai_settings, alien_width):
@@ -116,7 +121,7 @@ def change_fleet_direction(ai_settings, aliens):
         alien.rect.y += ai_settings.alien_drop_speed
     ai_settings.alien_fleet_direction *= -1
 
-def update_bullets(bullets, aliens, stats):
+def update_bullets(bullets, aliens, stats, game_sounds):
     for bullet in bullets.sprites():
         bullet.update()
         if bullet.rect.bottom <= 0:
@@ -127,6 +132,7 @@ def update_bullets(bullets, aliens, stats):
     #  如果是这样，就删除相应的子弹和外星人
     collisions = pygame.sprite.groupcollide(bullets, aliens, True, True)
     if collisions:
+        game_sounds[1].play()
         print("消灭了 " + str(len(collisions)) + " 个外星人")
         stats.current_score += 5 * len(collisions)
         stats.kill_num += len(collisions)
@@ -148,7 +154,7 @@ def update_aliens(ai_settings, stats, screen, ship, aliens, bullets):
     check_aliens_bottom(ai_settings, stats, screen, ship, aliens, bullets)
 
 
-def update_screen(ai_settings, screen, ship, bullets, aliens, stats, button_list):
+def update_screen(ai_settings, screen, ship, bullets, aliens, stats, button_list, game_sounds):
     """更新屏幕上图像，并切换到新的屏幕"""
 
     screen.fill(ai_settings.bg_color)
@@ -157,7 +163,7 @@ def update_screen(ai_settings, screen, ship, bullets, aliens, stats, button_list
             button.draw()
         sleep(1)
     else:
-        update_bullets(bullets, aliens, stats)
+        update_bullets(bullets, aliens, stats, game_sounds)
         update_aliens(ai_settings, stats, screen, ship, aliens, bullets) 
         update_ship(ship)
         stats.draw() 
